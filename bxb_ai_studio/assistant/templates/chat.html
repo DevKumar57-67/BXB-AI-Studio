@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BXB AI Assistant</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: #f4f6ff;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 14px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        header, .chat-box {
+            background: #151c30;
+            border: 1px solid #29334d;
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        header h1 { margin: 0 0 8px; }
+        header p { margin: 0; color: #aab5ce; }
+
+        .chat-box {
+            flex: 1;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .bot { background: #232e48; align-self: flex-start; }
+        .user { background: #5146e5; align-self: flex-end; }
+
+        form { display: flex; gap: 10px; margin-top: 20px; }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 13px;
+            border: 1px solid #394562;
+            border-radius: 10px;
+            background: #0d1426;
+            color: white;
+            font-size: 16px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 10px;
+            background: #6558f5;
+            color: white;
+            padding: 0 20px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:disabled { opacity: 0.6; cursor: wait; }
+        .status { color: #aab5ce; font-size: 13px; min-height: 18px; }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <header>
+            <h1>BXB AI Assistant</h1>
+            <p>Your personal assistant from BXB AI Studio</p>
+        </header>
+
+        <section class="chat-box">
+            <div id="messages" aria-live="polite">
+                <div class="message bot">
+                    Hello! 👋 I'm BXB AI Assistant. Send me a message to get started.
+                </div>
+            </div>
+
+            <div id="status" class="status"></div>
+
+            <form id="chat-form">
+                {% csrf_token %}
+                <input
+                    id="message-input"
+                    name="message"
+                    type="text"
+                    placeholder="Type your message..."
+                    autocomplete="off"
+                    required
+                >
+                <button id="send-button" type="submit">Send</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById("chat-form");
+        const input = document.getElementById("message-input");
+        const messages = document.getElementById("messages");
+        const status = document.getElementById("status");
+        const button = document.getElementById("send-button");
+
+        function addMessage(text, sender) {
+            const bubble = document.createElement("div");
+            bubble.className = `message ${sender}`;
+            bubble.textContent = text;
+            messages.appendChild(bubble);
+            bubble.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, "user");
+            input.value = "";
+            button.disabled = true;
+            status.textContent = "BXB AI is thinking...";
+
+            try {
+                const response = await fetch("{% url 'assistant:response' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": form.querySelector(
+                            "[name=csrfmiddlewaretoken]"
+                        ).value
+                    },
+                    body: new URLSearchParams({ message })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Request failed");
+                }
+
+                addMessage(data.reply, "bot");
+                status.textContent = "";
+            } catch (error) {
+                status.textContent = "Something went wrong. Please try again.";
+            } finally {
+                button.disabled = false;
+                input.focus();
+            }
+        });
+    </script>
+</body>
+</html>

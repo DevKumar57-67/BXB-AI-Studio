@@ -1,0 +1,174 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}BXB AI Studio{% endblock %}</title>
+
+    <style>
+        :root {
+            --bg: #0b1020;
+            --panel: #121a2d;
+            --border: #26334d;
+            --text: #edf2ff;
+            --muted: #9ba9c4;
+            --accent: #7c83ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .navbar {
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 16px 6%;
+            border-bottom: 1px solid var(--border);
+            background: var(--panel);
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: -0.5px;
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-links .chat-link {
+            background: var(--accent);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 9px;
+        }
+
+        .page-container {
+            width: min(1200px, 92%);
+            min-height: calc(100vh - 140px);
+            margin: 0 auto;
+            padding: 36px 0;
+        }
+
+        .panel {
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--panel);
+        }
+
+        .page-title {
+            margin-top: 0;
+            font-size: clamp(25px, 4vw, 36px);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: var(--accent);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 14px;
+            }
+
+            .page-container {
+                padding: 22px 0;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <a class="brand" href="{% url 'chat_page' %}">
+            BXB <span>AI Studio</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation">
+            <a href="{% url 'chat_page' %}">Home</a>
+            <a class="chat-link" href="{% url 'chat_page' %}">
+                💬 AI Chat
+            </a>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        &copy; {% now "Y" %} BXB AI Studio. All rights reserved.
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
